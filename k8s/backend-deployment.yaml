@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-backend-deployment
+  labels:
+    app: django-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: django-backend
+  template:
+    metadata:
+      labels:
+        app: django-backend
+    spec:
+      containers:
+        - name: django-container
+          image: mi-backend-django:v1.0
+          imagePullPolicy: Never # Utiliza la imagen local de Minikube
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: backend-config
+            - secretRef:
+                name: backend-secret
+          livenessProbe:
+            httpGet:
+              path: /admin/
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /admin/
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
